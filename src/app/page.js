@@ -5,6 +5,8 @@
 import { useAuth } from '@/utils/context/authContext';
 import { useEffect, useState } from 'react';
 
+const dbUrl = process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL;
+
 function Home() {
   // Since the returned data is an object, we must set the initial state as an empty object.
   const [uselessFact, SetUselessFact] = useState({});
@@ -17,12 +19,23 @@ function Home() {
     SetUselessFact(fact);
   };
 
-  const selectResponse = (boolean) => {
+  // onClick Event
+  const selectResponse = async (boolean) => {
+    // Since the URLs are very similar, check for yes or no.
+    const val = boolean ? 'Yes' : 'No';
     const obj = {
       userId: user.uid,
-      permaLink: uselessFact.permalink,
-      response: boolean,
+      text: uselessFact.text,
     };
+    // Make an API call to the db, we're we push this obj to Firebase.
+    await fetch(`${dbUrl}/response${val}.json`, {
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(obj),
+    });
+
     fetchFact();
     return obj;
   };
